@@ -49,5 +49,4 @@ class SleepLog(
     val morningFeeling: MorningFeeling,
 
     @Column(name = "created_at", nullable = false, updatable = false, columnDefinition = "TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP")
-    val createdAt: ZonedDateTime? = null
-)
+    val createdAt: ZonedDateTime = ZonedDateTime.now(java.time.ZoneId.of("UTC")))
