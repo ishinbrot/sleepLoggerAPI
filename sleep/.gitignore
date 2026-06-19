@@ -1,0 +1,17 @@
+# Gradle artifacts
+build/
+.gradle/
+*.jar
+
+# IDE settings
+.idea/
+*.iml
+.vscode/
+
+# Local database data
+/db/
+
+# System files
+.DS_Store
+Thumbs.db
+src/main/kotlin/com/noom/interview/fullstack/sleep/db/DatabaseConfiguration.kt
