@@ -1,6 +1,7 @@
 package com.noom.interview.fullstack.sleep.service
 
 import com.noom.interview.fullstack.sleep.dto.CreateSleepLogRequest
+import com.noom.interview.fullstack.sleep.dto.SleepAnalyticsResponse
 import com.noom.interview.fullstack.sleep.model.MorningFeeling
 import com.noom.interview.fullstack.sleep.model.SleepLog
 import com.noom.interview.fullstack.sleep.repository.SleepLogRepository
@@ -9,8 +10,11 @@ import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
+import org.mockito.ArgumentMatchers.any
+import org.mockito.ArgumentMatchers.eq
 import org.mockito.InjectMocks
 import org.mockito.Mock
+import org.assertj.core.api.Assertions.assertThat
 import org.mockito.Mockito.`when`
 import org.mockito.junit.jupiter.MockitoExtension
 import java.time.LocalDate
@@ -116,5 +120,59 @@ class SleepServiceTest {
         }
 
         assertEquals("A sleep log entry already exists for user user_123abc on date 2026-06-19", exception.message)
+    }
+
+    @Test
+    fun `getThirtyDayAnalytics should compute averages and frequencies correctly`() {
+        // Arrange
+        val userId = "noom_user_123"
+
+        // Mock data: 2 entries with different bedtimes, wake times, and feelings
+        val mockLogs = listOf(
+            SleepLog(
+                id = 1L, userId = userId, sleepDate = LocalDate.now(),
+                bedtime = LocalTime.of(22, 0), wakeTime = LocalTime.of(6, 0),
+                totalTimeInBedMinutes = 480, morningFeeling = MorningFeeling.GOOD
+            ),
+            SleepLog(
+                id = 2L, userId = userId, sleepDate = LocalDate.now().minusDays(1),
+                bedtime = LocalTime.of(23, 0), wakeTime = LocalTime.of(7, 0),
+                totalTimeInBedMinutes = 540, morningFeeling = MorningFeeling.OK
+            )
+        )
+        val targetStartDate = LocalDate.now().minusDays(30)
+        `when`(sleepLogRepository.findByUserIdAndSleepDateGreaterThanEqual(userId, targetStartDate))
+            .thenReturn(mockLogs)
+
+        // Act
+        val result: SleepAnalyticsResponse = sleepService.getThirtyDayAnalytics(userId)
+
+        assertThat(result.averageTotalTimeInBedMinutes).isEqualTo(510.0)
+
+        assertThat(result.averageBedtime).isEqualTo(LocalTime.of(22, 30))
+
+        assertThat(result.averageWakeTime).isEqualTo(LocalTime.of(6, 30))
+
+        assertThat(result.feelingFrequencies["GOOD"]).isEqualTo(1)
+        assertThat(result.feelingFrequencies["OK"]).isEqualTo(1)
+        assertThat(result.feelingFrequencies["BAD"]).isEqualTo(0)
+    }
+
+    @Test
+    fun `getThirtyDayAnalytics should handle empty history gracefully without throwing exceptions`() {
+        val userId = "new_user"
+        val targetStartDate = LocalDate.now().minusDays(30)
+
+        `when`(sleepLogRepository.findByUserIdAndSleepDateGreaterThanEqual(userId, targetStartDate))
+            .thenReturn(emptyList())
+
+        // Act
+        val result = sleepService.getThirtyDayAnalytics(userId)
+
+        // Assert
+        assertThat(result.averageTotalTimeInBedMinutes).isEqualTo(0.0)
+        assertThat(result.averageBedtime).isNull()
+        assertThat(result.averageWakeTime).isNull()
+        assertThat(result.feelingFrequencies["GOOD"]).isEqualTo(0)
     }
 }

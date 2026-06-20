@@ -18,7 +18,6 @@ class SleepLogRepositoryTest @Autowired constructor(
 
     @Test
     fun `existsByUserIdAndSleepDate should return true if entry matches`() {
-        // Arrange
         val userId = "user_test"
         val date = LocalDate.of(2026, 6, 19)
         val log = SleepLog(
@@ -32,16 +31,13 @@ class SleepLogRepositoryTest @Autowired constructor(
         )
         sleepLogRepository.save(log)
 
-        // Act
         val exists = sleepLogRepository.existsByUserIdAndSleepDate(userId, date)
 
-        // Assert
         assertTrue(exists)
     }
 
     @Test
     fun `database should block identical duplicate dates for same user`() {
-        // Arrange
         val userId = "user_block_test"
         val date = LocalDate.of(2026, 6, 19)
 
@@ -64,10 +60,8 @@ class SleepLogRepositoryTest @Autowired constructor(
             morningFeeling = MorningFeeling.GOOD,
             createdAt = java.time.ZonedDateTime.now() // Satisfies the database constraint
         )
-        // Act & Assert
         sleepLogRepository.save(log1)
 
-        // This forces Hibernate to immediately flush the SQL transaction to H2, triggering the unique check
         assertThrows<DataIntegrityViolationException> {
             sleepLogRepository.saveAndFlush(log2)
         }

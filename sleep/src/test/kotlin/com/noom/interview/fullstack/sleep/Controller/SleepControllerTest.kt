@@ -1,12 +1,13 @@
-package com.noom.interview.fullstack.sleep
+package com.noom.interview.fullstack.sleep.Controller
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.noom.interview.fullstack.sleep.SleepController
 import com.noom.interview.fullstack.sleep.dto.CreateSleepLogRequest
+import com.noom.interview.fullstack.sleep.dto.SleepAnalyticsResponse
 import com.noom.interview.fullstack.sleep.model.MorningFeeling
 import com.noom.interview.fullstack.sleep.model.SleepLog
 import com.noom.interview.fullstack.sleep.service.SleepService
 import org.junit.jupiter.api.Test
-import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.`when`
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
@@ -14,6 +15,7 @@ import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import java.time.LocalDate
@@ -66,7 +68,6 @@ class SleepControllerTest @Autowired constructor(
 
     @Test
     fun `POST sleep entry should bubble exceptions up to global advice handler`() {
-        // Arrange
         val request = CreateSleepLogRequest(
             userId = "user_duplicate",
             sleepDate = LocalDate.now(),
@@ -78,15 +79,37 @@ class SleepControllerTest @Autowired constructor(
         val exceptionMessage = "A sleep log entry already exists for user user_duplicate"
         `when`(sleepService.createLog(request)).thenThrow(IllegalArgumentException(exceptionMessage))
 
-        // Act & Assert
         mockMvc.perform(
             post("/api/v1/sleep")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request))
         )
             .andExpect(status().isBadRequest)
-        // If using GlobalExceptionHandler, it asserts the structured object fields:
-        // .andExpect(jsonPath("$.error").value("Bad Request"))
-        // .andExpect(jsonPath("$.message").value(exceptionMessage))
+    }
+    @Test
+    fun `GET sleep analytics should return 200 OK and calculated moving metrics`() {
+        val userId = "user_456"
+        val mockAnalytics = SleepAnalyticsResponse(
+            rangeStart = LocalDate.now().minusDays(30),
+            rangeEnd = LocalDate.now(),
+            averageTotalTimeInBedMinutes = 480.5,
+            averageBedtime = LocalTime.of(22, 30, 0),
+            averageWakeTime = LocalTime.of(6, 30, 0),
+            feelingFrequencies = mapOf("BAD" to 1, "OK" to 3, "GOOD" to 14)
+        )
+
+        `when`(sleepService.getThirtyDayAnalytics(userId)).thenReturn(mockAnalytics)
+
+        // Act & Assert
+        mockMvc.perform(
+            get("/api/v1/sleep/user/$userId/analytics")
+                .accept(MediaType.APPLICATION_JSON)
+        )
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.averageTotalTimeInBedMinutes").value(480.5))
+            .andExpect(jsonPath("$.averageBedtime").value("22:30:00"))
+            .andExpect(jsonPath("$.averageWakeTime").value("06:30:00"))
+            .andExpect(jsonPath("$.feelingFrequencies.GOOD").value(14))
+            .andExpect(jsonPath("$.feelingFrequencies.BAD").value(1))
     }
 }
