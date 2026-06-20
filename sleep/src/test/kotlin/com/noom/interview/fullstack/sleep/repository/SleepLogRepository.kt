@@ -2,18 +2,19 @@ package com.noom.interview.fullstack.sleep.repository
 
 import com.noom.interview.fullstack.sleep.model.MorningFeeling
 import com.noom.interview.fullstack.sleep.model.SleepLog
+import com.noom.interview.fullstack.sleep.repository.SleepLogRepository
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.dao.DataIntegrityViolationException
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.ZonedDateTime
 
-@DataJpaTest
-class SleepLogRepositoryTest @Autowired constructor(
+@DataJpaTest(excludeAutoConfiguration = [FlywayAutoConfiguration::class])class SleepLogRepositoryTest @Autowired constructor(
     val sleepLogRepository: SleepLogRepository
 ) {
 
@@ -28,7 +29,7 @@ class SleepLogRepositoryTest @Autowired constructor(
             wakeTime = LocalTime.of(6, 0),
             totalTimeInBedMinutes = 480,
             morningFeeling = MorningFeeling.OK,
-            createdAt = java.time.ZonedDateTime.now() // Satisfies the database constraint
+            createdAt = ZonedDateTime.now() // Satisfies the database constraint
         )
         val olderLog = sleepLog.copy(
             sleepDate = todaysDate.minusDays(5),
@@ -55,7 +56,7 @@ class SleepLogRepositoryTest @Autowired constructor(
             wakeTime = LocalTime.of(6, 0),
             totalTimeInBedMinutes = 480,
             morningFeeling = MorningFeeling.OK,
-            createdAt = java.time.ZonedDateTime.now()
+            createdAt = ZonedDateTime.now()
         )
 
         val log2 = SleepLog(
@@ -65,7 +66,7 @@ class SleepLogRepositoryTest @Autowired constructor(
             wakeTime = LocalTime.of(7, 0),
             totalTimeInBedMinutes = 480,
             morningFeeling = MorningFeeling.GOOD,
-            createdAt = java.time.ZonedDateTime.now()
+            createdAt = ZonedDateTime.now()
         )
         sleepLogRepository.save(log1)
 

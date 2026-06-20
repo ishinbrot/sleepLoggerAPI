@@ -13,6 +13,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.assertj.core.api.Assertions.assertThat
+import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.`when`
 import org.mockito.junit.jupiter.MockitoExtension
 import java.time.LocalDate
@@ -56,7 +57,7 @@ class SleepLogServiceTest {
 
         // Use Mockito's any() safely inside mockito-core by using class check if equality match isn't preferred,
         // but passing the constructed entity structure works beautifully
-        `when`(sleepLogRepository.save(org.mockito.ArgumentMatchers.any(SleepLog::class.java))).thenReturn(mockSavedLog)
+        `when`(sleepLogRepository.save(ArgumentMatchers.any(SleepLog::class.java))).thenReturn(mockSavedLog)
 
         // Act
         val result = sleepLogService.createLog(request)
@@ -90,7 +91,7 @@ class SleepLogServiceTest {
         )
 
         `when`(sleepLogRepository.existsByUserIdAndSleepDate(request.userId, request.sleepDate)).thenReturn(false)
-        `when`(sleepLogRepository.save(org.mockito.ArgumentMatchers.any(SleepLog::class.java))).thenReturn(mockSavedLog)
+        `when`(sleepLogRepository.save(ArgumentMatchers.any(SleepLog::class.java))).thenReturn(mockSavedLog)
 
         // Act
         val result = sleepLogService.createLog(request)
@@ -187,7 +188,7 @@ class SleepLogServiceTest {
             morningFeeling = MorningFeeling.GOOD
         )
 
-        `when`(sleepLogRepository.findById(targetId)).thenReturn(java.util.Optional.of(mockLog))
+        `when`(sleepLogRepository.findById(targetId)).thenReturn(Optional.of(mockLog))
 
         val result = sleepLogService.getLogById(targetId)
 
@@ -199,9 +200,9 @@ class SleepLogServiceTest {
     @Test
     fun `getLogById should throw NoSuchElementException when the ID does not exist`() {
         val nonExistentId = 999L
-        `when`(sleepLogRepository.findById(nonExistentId)).thenReturn(java.util.Optional.empty())
+        `when`(sleepLogRepository.findById(nonExistentId)).thenReturn(Optional.empty())
 
-        val exception = org.junit.jupiter.api.assertThrows<NoSuchElementException> {
+        val exception = assertThrows<NoSuchElementException> {
             sleepLogService.getLogById(nonExistentId)
         }
 

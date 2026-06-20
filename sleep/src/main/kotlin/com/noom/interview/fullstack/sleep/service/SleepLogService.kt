@@ -10,6 +10,8 @@ import org.springframework.transaction.annotation.Transactional
 import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalTime
+import java.time.ZoneId
+import java.time.ZonedDateTime
 
 /**
  * Service layer orchestrator responsible for executing business domain logic, validation checks,
@@ -54,7 +56,7 @@ class SleepLogService(private val sleepLogRepository: SleepLogRepository) {
             wakeTime = request.wakeTime,
             totalTimeInBedMinutes = totalMinutes,
             morningFeeling = request.morningFeeling,
-            createdAt = java.time.ZonedDateTime.now(java.time.ZoneId.of("UTC"))
+            createdAt = ZonedDateTime.now(ZoneId.of("UTC"))
         )
 
         val savedLog =  sleepLogRepository.save(sleepLog)
