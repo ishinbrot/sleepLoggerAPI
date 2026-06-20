@@ -72,7 +72,7 @@ class SleepLogService(private val sleepLogRepository: SleepLogRepository) {
      * @param wakeTime The localized time the user woke up.
      * @return The absolute elapsed time spent in bed, represented in minutes.
      */
-    private fun calculateMinutesInBed(bedtime: java.time.LocalTime, wakeTime: java.time.LocalTime): Int {
+    private fun calculateMinutesInBed(bedtime: LocalTime, wakeTime: LocalTime): Int {
         val duration = Duration.between(bedtime, wakeTime)
         val minutes = duration.toMinutes()
 
@@ -156,7 +156,7 @@ class SleepLogService(private val sleepLogRepository: SleepLogRepository) {
      * @throws NoSuchElementException If the user profile has not initialized any logs in the database.
      */
     fun getLastNightsSleep(userId: String): SleepLog {
-        log.debug("Querying last nights sleep for user: {}", userId);
+        log.debug("Querying last nights sleep for user: {}", userId)
         return sleepLogRepository.findFirstByUserIdOrderBySleepDateDesc(userId)
             .orElseThrow { NoSuchElementException("No sleep history logs found with ID: $userId") }
 
