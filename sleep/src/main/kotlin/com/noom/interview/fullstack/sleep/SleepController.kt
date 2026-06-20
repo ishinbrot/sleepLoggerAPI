@@ -1,6 +1,7 @@
 package com.noom.interview.fullstack.sleep
 
 import com.noom.interview.fullstack.sleep.dto.CreateSleepLogRequest
+import com.noom.interview.fullstack.sleep.dto.SleepAnalyticsResponse
 import com.noom.interview.fullstack.sleep.dto.SleepLogResponse
 import com.noom.interview.fullstack.sleep.service.SleepService
 import io.swagger.v3.oas.annotations.Operation
@@ -9,6 +10,7 @@ import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.tags.Tag
+import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping("/api/v1/sleep")
 @Tag(name = "Sleep Tracking", description = "Endpoints for logging and analyzing user sleep data")
 class SleepController(private val sleepService: SleepService) {
+    private val log = LoggerFactory.getLogger(SleepController::class.java)
 
     @PostMapping
     @Operation(
@@ -48,5 +51,24 @@ class SleepController(private val sleepService: SleepService) {
             )
 
             return ResponseEntity.status(HttpStatus.CREATED).body(responseBody)
+    }
+    @GetMapping("/user/{userId}/analytics")
+    @Operation(
+        summary = "Get 30-day sleep averages",
+        description = "Retrieves the historical moving average metrics of time spent in bed across the trailing 30 days.",
+        responses = [
+            ApiResponse(
+                responseCode = "200", description = "Analytics calculated successfully",
+                content = [Content(schema = Schema(implementation = SleepAnalyticsResponse::class))]
+            ),
+            ApiResponse(responseCode = "500", description = "Internal server error")
+        ]
+    )
+    fun getSleepAnalytics(
+        @PathVariable userId: String
+    ): ResponseEntity<SleepAnalyticsResponse> {
+        log.debug("Received analytics request endpoint for userId: {}", userId)
+        val analytics = sleepService.getThirtyDayAnalytics(userId)
+        return ResponseEntity.ok(analytics)
     }
 }

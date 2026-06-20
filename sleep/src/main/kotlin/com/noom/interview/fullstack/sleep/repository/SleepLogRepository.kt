@@ -9,4 +9,5 @@ import java.time.LocalDate
 interface SleepLogRepository : JpaRepository<SleepLog, Long> {
     fun findByUserIdOrderBySleepDateDesc(userId: String): List<SleepLog>
     fun existsByUserIdAndSleepDate(userId: String, sleepDate: LocalDate): Boolean
+    fun findByUserIdAndSleepDateGreaterThanEqual(userId: String, startDate: LocalDate): List<SleepLog>
 }
