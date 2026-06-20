@@ -95,7 +95,8 @@ class SleepControllerTest @Autowired constructor(
             averageTotalTimeInBedMinutes = 480.5,
             averageBedtime = LocalTime.of(22, 30, 0),
             averageWakeTime = LocalTime.of(6, 30, 0),
-            feelingFrequencies = mapOf("BAD" to 1, "OK" to 3, "GOOD" to 14)
+            feelingFrequencies = mapOf("BAD" to 1, "OK" to 3, "GOOD" to 14),
+            latestSleepLogId = 99L
         )
 
         `when`(sleepService.getThirtyDayAnalytics(userId)).thenReturn(mockAnalytics)
@@ -112,4 +113,46 @@ class SleepControllerTest @Autowired constructor(
             .andExpect(jsonPath("$.feelingFrequencies.GOOD").value(14))
             .andExpect(jsonPath("$.feelingFrequencies.BAD").value(1))
     }
+
+    @Test
+    fun `GET single log by ID should return 200 OK and match individual parameters`() {
+        val targetId = 99L
+        val mockEntity = SleepLog(
+            id = targetId,
+            userId = "user_456",
+            sleepDate = LocalDate.of(2026, 6, 19),
+            bedtime = LocalTime.of(22, 30, 0),
+            wakeTime = LocalTime.of(6, 45, 0),
+            totalTimeInBedMinutes = 495,
+            morningFeeling = MorningFeeling.GOOD
+        )
+
+        `when`(sleepService.getLogById(targetId)).thenReturn(mockEntity)
+
+        mockMvc.perform(
+            get("/api/v1/sleep/$targetId")
+                .accept(MediaType.APPLICATION_JSON)
+        )
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.id").value(targetId))
+            .andExpect(jsonPath("$.userId").value("user_456"))
+            .andExpect(jsonPath("$.morningFeeling").value("GOOD"))
+    }
+
+    @Test
+    fun `GET single log by ID should return 404 Not Found when entity does not exist`() {
+        val nonExistentId = 999L
+        val errorMessage = "Sleep log entry not found with ID: $nonExistentId"
+
+        `when`(sleepService.getLogById(nonExistentId))
+            .thenThrow(NoSuchElementException(errorMessage))
+
+        mockMvc.perform(
+            get("/api/v1/sleep/$nonExistentId")
+                .accept(MediaType.APPLICATION_JSON)
+        )
+            .andExpect(status().isNotFound)
+    }
+
+
 }

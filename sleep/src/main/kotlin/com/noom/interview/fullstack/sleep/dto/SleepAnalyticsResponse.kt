@@ -13,5 +13,6 @@ data class SleepAnalyticsResponse(
     val averageTotalTimeInBedMinutes: Double,
     val averageBedtime: LocalTime?,
     val averageWakeTime: LocalTime?,
-    val feelingFrequencies: Map<String, Int>
+    val feelingFrequencies: Map<String, Int>,
+    val latestSleepLogId: Long?
 )
