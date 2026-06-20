@@ -1,6 +1,6 @@
 {
   "info": {
-    "_postman_id": "ed242cb7-5513-4731-8f8c-5089819a3511",
+    "_postman_id": "1c5e9f6c-6dce-44f2-9552-f50a62315b60",
     "name": "SleepAPI",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "_exporter_id": "9070168"
@@ -42,7 +42,7 @@
         "method": "GET",
         "header": [],
         "url": {
-          "raw": "http://localhost:8080/api/v1/sleep?userId=user_123abd",
+          "raw": "http://localhost:8080/api/v1/sleep/user/{{userId}}/analytics",
           "protocol": "http",
           "host": [
             "localhost"
@@ -51,14 +51,10 @@
           "path": [
             "api",
             "v1",
-            "sleep"
-          ],
-          "query": [
-            {
-              "key": "userId",
-              "value": "user_123abd",
-              "type": "text"
-            }
+            "sleep",
+            "user",
+            "{{userId}}",
+            "analytics"
           ]
         }
       },
@@ -70,7 +66,7 @@
         "method": "GET",
         "header": [],
         "url": {
-          "raw": "http://localhost:8080/api/v1/sleep/34",
+          "raw": "http://localhost:8080/api/v1/sleep/{{id}}",
           "protocol": "http",
           "host": [
             "localhost"
@@ -80,7 +76,7 @@
             "api",
             "v1",
             "sleep",
-            "34"
+            "{{id}}"
           ]
         }
       },
@@ -92,7 +88,7 @@
         "method": "GET",
         "header": [],
         "url": {
-          "raw": "http://localhost:8080/api/v1/sleep/34",
+          "raw": "http://localhost:8080/api/v1/sleep/{{id}}",
           "protocol": "http",
           "host": [
             "localhost"
@@ -102,7 +98,31 @@
             "api",
             "v1",
             "sleep",
-            "34"
+            "{{id}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "GetUsersSleep",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/api/v1/sleep/user/{{userId}}/history",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "v1",
+            "sleep",
+            "user",
+            "{{userId}}",
+            "history"
           ]
         }
       },

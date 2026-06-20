@@ -17,6 +17,7 @@ The core application provides capability to:
 ### Practical Integrations & Tooling
 * **Identity Context:** In a real-world production scenario, the `userID` represents an immutable unique user identifier that would be securely provided and managed by an upstream federated cloud application or Identity Provider (IdP).
 * **Postman Integration:** The interactive Postman collection is saved directly in this project as `SleepAPI.postman_collection.json` inside the `resources` folder. In a live team framework, this collection would actively utilize decoupled variables and secure environment scopes (restricted to lower-level configurations) to facilitate cross-team collaboration.
+* **Script:** Running `test-api.sh` in the top level directory will test the API ./resources/test-api.sh (The API is required to be running prior to the script)
 * Variables were used for parameters in the collection
 * **Git & Version Control Conventions:** In a standardized corporate environment, every commit and branching path would mirror a project-specific convention tied directly to a target JIRA ticket tracking identifier. As explicit tickets were omitted for this assignment context, a concise structural description of each standalone requirement was substituted to ensure clear history tracking.
 
@@ -31,6 +32,7 @@ The core application provides capability to:
 * A ticketing system would formalize a naming convention. Descriptions were utilized as the tickets instead
 * A project specific board was not utilized in this excercise
 * A release process will need to identify ticket numbers in a real world scenario
+
 
 # Backend Engineering Interview: Take-home Assignment
 
