@@ -1,4 +1,4 @@
-package com.noom.interview.fullstack.sleep.Controller
+package com.noom.interview.fullstack.sleep.controller
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.noom.interview.fullstack.sleep.SleepLogController
