@@ -1,0 +1,132 @@
+{
+  "info": {
+    "_postman_id": "1c5e9f6c-6dce-44f2-9552-f50a62315b60",
+    "name": "SleepAPI",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "9070168"
+  },
+  "item": [
+    {
+      "name": "create sleep",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"userId\": \"user_123abd\",\n  \"sleepDate\": \"2026-06-20\",\n  \"bedtime\": \"22:30:00\",\n  \"wakeTime\": \"06:45:00\",\n  \"morningFeeling\": \"GOOD\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/v1/sleep",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "v1",
+            "sleep"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "get30DayAverage",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/api/v1/sleep/user/{{userId}}/analytics",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "v1",
+            "sleep",
+            "user",
+            "{{userId}}",
+            "analytics"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Sleep",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/api/v1/sleep/{{id}}",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "v1",
+            "sleep",
+            "{{id}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Last Nights Sleep",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/api/v1/sleep/{{id}}",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "v1",
+            "sleep",
+            "{{id}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "GetUsersSleep",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/api/v1/sleep/user/{{userId}}/history",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "v1",
+            "sleep",
+            "user",
+            "{{userId}}",
+            "history"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}
