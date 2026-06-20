@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.tags.Tag
+import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping("/api/v1/sleep")
 @Tag(name = "Sleep Tracking", description = "Endpoints for logging and analyzing user sleep data")
 class SleepController(private val sleepService: SleepService) {
+    private val log = LoggerFactory.getLogger(SleepController::class.java)
 
     @PostMapping
     @Operation(
@@ -65,6 +67,7 @@ class SleepController(private val sleepService: SleepService) {
     fun getSleepAnalytics(
         @PathVariable userId: String
     ): ResponseEntity<SleepAnalyticsResponse> {
+        log.debug("Received analytics request endpoint for userId: {}", userId)
         val analytics = sleepService.getThirtyDayAnalytics(userId)
         return ResponseEntity.ok(analytics)
     }

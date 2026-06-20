@@ -63,9 +63,11 @@ class SleepService(private val sleepLogRepository: SleepLogRepository) {
         val endDate = LocalDate.now()
         val startDate = endDate.minusDays(30)
 
+        log.info("Fetching 30-day sleep analytics for userId: {} between {} and {}", userId, startDate, endDate)
         val logs = sleepLogRepository.findByUserIdAndSleepDateGreaterThanEqual(userId, startDate)
 
         if (logs.isEmpty()) {
+            log.info("No sleep logs found for userId: {} within the 30-day window. Returning empty analytics template.", userId)
             return SleepAnalyticsResponse(
                 rangeStart = startDate,
                 rangeEnd = endDate,
@@ -75,7 +77,7 @@ class SleepService(private val sleepLogRepository: SleepLogRepository) {
                 feelingFrequencies = mapOf("BAD" to 0, "OK" to 0, "GOOD" to 0)
             )
         }
-
+        log.debug("Successfully retrieved {} sleep log records for processing for userId: {}", logs.size, userId)
         val avgTimeInBed = logs.map { it.totalTimeInBedMinutes }.average()
 
         val avgBedtimeSeconds = logs.map { it.bedtime.toSecondOfDay() }.average().toLong()
@@ -85,7 +87,8 @@ class SleepService(private val sleepLogRepository: SleepLogRepository) {
         logs.groupBy { it.morningFeeling }.forEach { (feeling, entries) ->
             initialFrequencies[feeling.name] = entries.size
         }
-
+        log.debug("Analytics computed for user: {}. AvgMinutes: {}, FeelingDistribution: {}",
+            userId, avgTimeInBed, initialFrequencies)
         return SleepAnalyticsResponse(
             rangeStart = startDate,
             rangeEnd = endDate,
