@@ -24,7 +24,7 @@ The core application provides capability to:
 
 ## Testing Suite and Code Coverage
 
-* **Service Layer Unit Tests (`SleepLogServiceTest`):** Isolates business domain logic, ensuring mock calculations handle midnight crossovers cleanly and verify fallback behavior for fresh user profiles without tracking history.
+* **Service Layer Unit Tests (`SleepLogServiceTest`):** Isolates business domain logic, and ensures adequate code coverage
 * **Controller Layer Boundary Tests (`SleepLogControllerTest` / `GlobalExceptionHandlerTest`):** Leverages `MockMvc` to verify network serialization boundaries. Includes boundary type validation testing to guarantee malformed parameters, collections arrays, or corrupted payloads are blocked and returned early with a structured `400 Bad Request`.
 * In a CI/CD process there would be a check for code coverage and code would have been prevented from being merged in.
 
