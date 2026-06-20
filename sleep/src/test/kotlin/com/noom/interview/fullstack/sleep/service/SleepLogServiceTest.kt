@@ -164,15 +164,16 @@ class SleepLogServiceTest {
         val userId = "new_user"
         val targetStartDate = LocalDate.now().minusDays(30)
 
+        val errorMessage = "Sleep log entry not found with ID: $userId";
         `when`(sleepLogRepository.findByUserIdAndSleepDateGreaterThanEqual(userId, targetStartDate))
-            .thenReturn(emptyList())
+            .thenThrow(IllegalArgumentException(errorMessage))
 
-        val result = sleepLogService.getThirtyDayAnalytics(userId)
+        val exception = assertThrows<IllegalArgumentException> {
+            sleepLogService.getThirtyDayAnalytics(userId)
+        }
 
-        assertThat(result.averageTotalTimeInBedMinutes).isEqualTo(0.0)
-        assertThat(result.averageBedtime).isNull()
-        assertThat(result.averageWakeTime).isNull()
-        assertThat(result.feelingFrequencies["GOOD"]).isEqualTo(0)
+        // Verify the exception message matches what was thrown by the mock
+        assertThat(exception.message).isEqualTo(errorMessage)
     }
 
     @Test

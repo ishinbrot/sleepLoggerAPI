@@ -29,7 +29,11 @@ class SleepLogService(private val sleepLogRepository: SleepLogRepository) {
      */
     @Transactional(readOnly = true)
     fun getSleepLogsForUser(userId: String): List<SleepLog> {
-        return sleepLogRepository.findByUserIdOrderBySleepDateDesc(userId)
+        val sleepLogs =  sleepLogRepository.findByUserIdOrderBySleepDateDesc(userId)
+        if (sleepLogs.isEmpty()) {
+            throw NoSuchElementException("No sleep logs found for user ID: $userId")
+        }
+        return sleepLogs;
     }
     /**
      * Validates and provisions a new historical sleep log entry for a user profile.
@@ -103,16 +107,8 @@ class SleepLogService(private val sleepLogRepository: SleepLogRepository) {
         val logs = sleepLogRepository.findByUserIdAndSleepDateGreaterThanEqual(userId, startDate)
 
         if (logs.isEmpty()) {
-            log.info("No sleep logs found for userId: {} within the 30-day window. Returning empty analytics template.", userId)
-            return SleepAnalyticsResponse(
-                rangeStart = startDate,
-                rangeEnd = endDate,
-                averageTotalTimeInBedMinutes = 0.0,
-                averageBedtime = null,
-                averageWakeTime = null,
-                feelingFrequencies = mapOf("BAD" to 0, "OK" to 0, "GOOD" to 0),
-                null
-            )
+            log.info("No sleep logs found for userId: {} within the 30-day window. Returning not found error.", userId)
+            throw NoSuchElementException("Sleep log entry not found with ID: $userId")
         }
         val latestLogId = logs.maxByOrNull { it.sleepDate }?.id
         log.debug("Successfully retrieved {} sleep log records for processing for userId: {}", logs.size, userId)

@@ -6,6 +6,8 @@ import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.http.converter.HttpMessageNotReadableException
+import org.springframework.web.bind.MethodArgumentNotValidException
+import org.springframework.web.bind.MissingPathVariableException
 import org.springframework.web.bind.annotation.RestControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
 import javax.servlet.http.HttpServletRequest
@@ -70,5 +72,23 @@ class GlobalExceptionHandler {
         )
         
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse)
+    }
+    @ExceptionHandler(
+        MissingPathVariableException::class,
+    )
+    fun handleBadRequestExceptions(
+        ex: Exception,
+        request: HttpServletRequest
+    ): ResponseEntity<ApiError> {
+        log.warn("Bad Request received: ${ex.message}")
+
+        val errorBody = ApiError(
+            status = HttpStatus.BAD_REQUEST.value(),
+            error = HttpStatus.BAD_REQUEST.reasonPhrase,
+            message = "Required request parameters, path variables, or body fields are missing or malformed.",
+            path = request.requestURI
+
+        )
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorBody)
     }
 }
