@@ -3,11 +3,14 @@ package com.noom.interview.fullstack.sleep.service
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import com.noom.interview.fullstack.sleep.dto.CreateSleepLogRequest
+import com.noom.interview.fullstack.sleep.dto.SleepAnalyticsResponse
 import com.noom.interview.fullstack.sleep.model.SleepLog
 import com.noom.interview.fullstack.sleep.repository.SleepLogRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.Duration
+import java.time.LocalDate
+import java.time.LocalTime
 
 @Service
 class SleepService(private val sleepLogRepository: SleepLogRepository) {
@@ -55,5 +58,41 @@ class SleepService(private val sleepLogRepository: SleepLogRepository) {
         } else {
             minutes.toInt()
         }
+    }
+    fun getThirtyDayAnalytics(userId: String): SleepAnalyticsResponse {
+        val endDate = LocalDate.now()
+        val startDate = endDate.minusDays(30)
+
+        val logs = sleepLogRepository.findByUserIdAndSleepDateGreaterThanEqual(userId, startDate)
+
+        if (logs.isEmpty()) {
+            return SleepAnalyticsResponse(
+                rangeStart = startDate,
+                rangeEnd = endDate,
+                averageTotalTimeInBedMinutes = 0.0,
+                averageBedtime = null,
+                averageWakeTime = null,
+                feelingFrequencies = mapOf("BAD" to 0, "OK" to 0, "GOOD" to 0)
+            )
+        }
+
+        val avgTimeInBed = logs.map { it.totalTimeInBedMinutes }.average()
+
+        val avgBedtimeSeconds = logs.map { it.bedtime.toSecondOfDay() }.average().toLong()
+        val avgWakeTimeSeconds = logs.map { it.wakeTime.toSecondOfDay() }.average().toLong()
+
+        val initialFrequencies = mutableMapOf("BAD" to 0, "OK" to 0, "GOOD" to 0)
+        logs.groupBy { it.morningFeeling }.forEach { (feeling, entries) ->
+            initialFrequencies[feeling.name] = entries.size
+        }
+
+        return SleepAnalyticsResponse(
+            rangeStart = startDate,
+            rangeEnd = endDate,
+            averageTotalTimeInBedMinutes = avgTimeInBed,
+            averageBedtime = LocalTime.ofSecondOfDay(avgBedtimeSeconds),
+            averageWakeTime = LocalTime.ofSecondOfDay(avgWakeTimeSeconds),
+            feelingFrequencies = initialFrequencies
+        )
     }
 }

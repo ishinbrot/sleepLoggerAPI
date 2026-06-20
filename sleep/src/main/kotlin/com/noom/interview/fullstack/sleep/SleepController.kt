@@ -1,6 +1,7 @@
 package com.noom.interview.fullstack.sleep
 
 import com.noom.interview.fullstack.sleep.dto.CreateSleepLogRequest
+import com.noom.interview.fullstack.sleep.dto.SleepAnalyticsResponse
 import com.noom.interview.fullstack.sleep.dto.SleepLogResponse
 import com.noom.interview.fullstack.sleep.service.SleepService
 import io.swagger.v3.oas.annotations.Operation
@@ -48,5 +49,23 @@ class SleepController(private val sleepService: SleepService) {
             )
 
             return ResponseEntity.status(HttpStatus.CREATED).body(responseBody)
+    }
+    @GetMapping("/user/{userId}/analytics")
+    @Operation(
+        summary = "Get 30-day sleep averages",
+        description = "Retrieves the historical moving average metrics of time spent in bed across the trailing 30 days.",
+        responses = [
+            ApiResponse(
+                responseCode = "200", description = "Analytics calculated successfully",
+                content = [Content(schema = Schema(implementation = SleepAnalyticsResponse::class))]
+            ),
+            ApiResponse(responseCode = "500", description = "Internal server error")
+        ]
+    )
+    fun getSleepAnalytics(
+        @PathVariable userId: String
+    ): ResponseEntity<SleepAnalyticsResponse> {
+        val analytics = sleepService.getThirtyDayAnalytics(userId)
+        return ResponseEntity.ok(analytics)
     }
 }
