@@ -26,7 +26,7 @@ class SleepLogService(private val sleepLogRepository: SleepLogRepository) {
      * @return A list of [SleepLog] entities associated with the user profile.
      */
     @Transactional(readOnly = true)
-    fun getLogsForUser(userId: String): List<SleepLog> {
+    fun getSleepLogsForUser(userId: String): List<SleepLog> {
         return sleepLogRepository.findByUserIdOrderBySleepDateDesc(userId)
     }
     /**
@@ -148,8 +148,8 @@ class SleepLogService(private val sleepLogRepository: SleepLogRepository) {
             .orElseThrow { NoSuchElementException("Sleep log entry not found with ID: $id") }
     }
     /**
-     * Resolves and extracts the single chronologically newest log recorded by a user profile.
-     * Maps precisely to core application Requirement #2 requirements.
+     * Resolves and extracts the single the last nights sleep for a user
+     *
      *
      * @param userId The unique identifier string of the target user profile.
      * @return The single latest [SleepLog] entry.
