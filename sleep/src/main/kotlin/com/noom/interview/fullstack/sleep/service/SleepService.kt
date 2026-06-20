@@ -106,4 +106,10 @@ class SleepService(private val sleepLogRepository: SleepLogRepository) {
         return sleepLogRepository.findById(id)
             .orElseThrow { NoSuchElementException("Sleep log entry not found with ID: $id") }
     }
+    fun getLastNightsSleep(userId: String): SleepLog {
+        log.debug("Querying last nights sleep for user: {}", userId);
+        return sleepLogRepository.findFirstByUserIdOrderBySleepDateDesc(userId)
+            .orElseThrow { NoSuchElementException("No sleep history logs found with ID: $userId") }
+
+    }
 }

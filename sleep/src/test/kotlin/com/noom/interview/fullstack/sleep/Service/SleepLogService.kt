@@ -19,6 +19,7 @@ import org.mockito.Mockito.`when`
 import org.mockito.junit.jupiter.MockitoExtension
 import java.time.LocalDate
 import java.time.LocalTime
+import java.util.Optional
 
 @ExtendWith(MockitoExtension::class)
 class SleepServiceTest {
@@ -144,7 +145,6 @@ class SleepServiceTest {
         `when`(sleepLogRepository.findByUserIdAndSleepDateGreaterThanEqual(userId, targetStartDate))
             .thenReturn(mockLogs)
 
-        // Act
         val result: SleepAnalyticsResponse = sleepService.getThirtyDayAnalytics(userId)
 
         assertThat(result.averageTotalTimeInBedMinutes).isEqualTo(510.0)
@@ -156,6 +156,8 @@ class SleepServiceTest {
         assertThat(result.feelingFrequencies["GOOD"]).isEqualTo(1)
         assertThat(result.feelingFrequencies["OK"]).isEqualTo(1)
         assertThat(result.feelingFrequencies["BAD"]).isEqualTo(0)
+        assertEquals(1L, result.latestSleepLogId)
+
     }
 
     @Test
@@ -206,5 +208,27 @@ class SleepServiceTest {
         }
 
         assertEquals("Sleep log entry not found with ID: $nonExistentId", exception.message)
+    }
+
+    @Test
+    fun `getLastNightsSleep should return the chronologically newest single log entry`() {
+        val userId = "user_123abc"
+        val expectedLog = SleepLog(
+            id = 99L,
+            userId = userId,
+            sleepDate = LocalDate.now(),
+            bedtime = LocalTime.of(22, 0),
+            wakeTime = LocalTime.of(6, 0),
+            totalTimeInBedMinutes = 480,
+            morningFeeling = MorningFeeling.GOOD
+        )
+
+        `when`(sleepLogRepository.findFirstByUserIdOrderBySleepDateDesc(userId)).thenReturn(Optional.of(expectedLog))
+
+        val result = sleepService.getLastNightsSleep(userId)
+
+         assertEquals(99L, result.id)
+        assertEquals(LocalDate.now(), result.sleepDate)
+        assertEquals(MorningFeeling.GOOD, result.morningFeeling)
     }
 }

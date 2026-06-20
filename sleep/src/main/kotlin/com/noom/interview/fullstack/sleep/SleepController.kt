@@ -84,5 +84,25 @@ class SleepController(
     ): ResponseEntity<SleepLogResponse> {
         log.info("Received request for single sleep log view, ID: {}", id)
         val sleepLog = sleepService.getLogById(id)
-        return ResponseEntity.ok(sleepLogMapper.toResponseDto(sleepLog))    }
+        return ResponseEntity.ok(sleepLogMapper.toResponseDto(sleepLog))
+    }
+    @GetMapping("/user/{userId}/last-night")
+    @Operation(
+        summary = "Fetch information about last night's sleep",
+        description = "Requirement #2: Retrieves the single most recent sleep log entry recorded by the user.",
+        responses = [
+            ApiResponse(
+                responseCode = "200", description = "Last night's log located successfully",
+                content = [Content(schema = Schema(implementation = SleepLogResponse::class))]
+            ),
+            ApiResponse(responseCode = "404", description = "No history profile found for target user")
+        ]
+    )
+    fun getLastNightsSleep(
+        @PathVariable userId: String
+    ): ResponseEntity<SleepLogResponse> {
+        log.debug("Fetching last night's profile for userId: {}", userId)
+        val savedLog = sleepService.getLastNightsSleep(userId)
+        return ResponseEntity.ok(sleepLogMapper.toResponseDto(savedLog))
+    }
 }

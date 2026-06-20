@@ -3,6 +3,7 @@ package com.noom.interview.fullstack.sleep.exception
 import com.fasterxml.jackson.databind.JsonMappingException
 import com.fasterxml.jackson.databind.exc.MismatchedInputException
 import com.noom.interview.fullstack.sleep.SleepController
+import com.noom.interview.fullstack.sleep.mapper.SleepLogMapper
 import com.noom.interview.fullstack.sleep.service.SleepService
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito.`when`
@@ -25,6 +26,8 @@ class GlobalExceptionHandlerTest @Autowired constructor(
 
     @MockBean
     lateinit var sleepService: SleepService
+    @MockBean
+    lateinit var sleepLogMapper: SleepLogMapper
     @Test
     fun `should handle IllegalArgumentException and format structured ApiError`() {
         val userId = "user_123"

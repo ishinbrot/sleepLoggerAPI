@@ -181,6 +181,43 @@ class SleepControllerTest @Autowired constructor(
         )
             .andExpect(status().isNotFound)
     }
+    @Test
+    fun `GET last night sleep profile should return 200 OK and match raw data payload`() {
+        // Arrange
+        val userId = "user_456"
+        val mockEntity = SleepLog(
+            id = 99L,
+            userId = userId,
+            sleepDate = LocalDate.of(2026, 6, 20),
+            bedtime = LocalTime.of(22, 0, 0),
+            wakeTime = LocalTime.of(6, 0, 0),
+            totalTimeInBedMinutes = 480,
+            morningFeeling = MorningFeeling.GOOD
+        )
 
+        val expectedResponseDto = SleepLogResponse(
+            id = 99L,
+            userId = userId,
+            sleepDate = mockEntity.sleepDate,
+            bedtime = mockEntity.bedtime,
+            wakeTime = mockEntity.wakeTime,
+            totalTimeInBedMinutes = 480,
+            morningFeeling = mockEntity.morningFeeling
+        )
+
+        `when`(sleepService.getLastNightsSleep(userId)).thenReturn(mockEntity)
+        `when`(sleepLogMapper.toResponseDto(mockEntity)).thenReturn(expectedResponseDto)
+
+        // Act & Assert
+        mockMvc.perform(
+            get("/api/v1/sleep/user/$userId/last-night")
+                .accept(MediaType.APPLICATION_JSON)
+        )
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.id").value(99))
+            .andExpect(jsonPath("$.userId").value(userId))
+            .andExpect(jsonPath("$.totalTimeInBedMinutes").value(480))
+            .andExpect(jsonPath("$.morningFeeling").value("GOOD"))
+    }
 
 }
