@@ -8,6 +8,7 @@ import com.noom.interview.fullstack.sleep.model.SleepLog
 import com.noom.interview.fullstack.sleep.service.SleepLogService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
+import io.swagger.v3.oas.annotations.media.ArraySchema
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
@@ -24,6 +25,28 @@ class SleepLogController(
     private val sleepLogService: SleepLogService,
     private val sleepLogMapper: SleepLogMapper)  {
     private val log = LoggerFactory.getLogger(SleepLogController::class.java)
+
+    @GetMapping("/user/{userId}/history")
+    @Operation(
+        summary = "Fetch complete sleep log history",
+        description = "Retrieves all historical sleep log records for a specific user, sorted from newest to oldest.",
+        responses = [
+            ApiResponse(
+                responseCode = "200", description = "Historical tracking record located successfully",
+                content = [Content(array = ArraySchema(schema = Schema(implementation = SleepLogResponse::class)))]
+            ),
+            ApiResponse(responseCode = "500", description = "Internal server error")
+        ]
+    )
+    fun getUserSleepHistory(
+        @PathVariable userId: String
+    ): ResponseEntity<List<SleepLogResponse>> {
+        log.debug("Received history list request for userId: {}", userId)
+        val logs = sleepLogService.getSleepLogsForUser(userId)
+
+        val responseList = logs.map { sleepLogMapper.toResponseDto(it) }
+        return ResponseEntity.ok(responseList)
+    }
     @PostMapping
     @Operation(
         summary = "Log a new sleep entry",
@@ -89,7 +112,7 @@ class SleepLogController(
     @GetMapping("/user/{userId}/last-night")
     @Operation(
         summary = "Fetch information about last night's sleep",
-        description = "Requirement #2: Retrieves the single most recent sleep log entry recorded by the user.",
+        description = "This retrieves the most recent sleep log entry recorded by the user.",
         responses = [
             ApiResponse(
                 responseCode = "200", description = "Last night's log located successfully",

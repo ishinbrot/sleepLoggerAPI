@@ -216,4 +216,70 @@ class SleepLogControllerTest @Autowired constructor(
             .andExpect(jsonPath("$.morningFeeling").value("GOOD"))
     }
 
+    @Test
+    fun `GET user history should return 200 OK and match serialized collection array`() {
+        val userId = "user_456"
+        val mockEntityList = listOf(
+            SleepLog(
+                id = 101L,
+                userId = userId,
+                sleepDate = LocalDate.of(2026, 6, 20),
+                bedtime = LocalTime.of(22, 0),
+                wakeTime = LocalTime.of(6, 0),
+                totalTimeInBedMinutes = 480,
+                morningFeeling = MorningFeeling.GOOD
+            ),
+            SleepLog(
+                id = 100L,
+                userId = userId,
+                sleepDate = LocalDate.of(2026, 6, 19),
+                bedtime = LocalTime.of(23, 0),
+                wakeTime = LocalTime.of(7, 0),
+                totalTimeInBedMinutes = 480,
+                morningFeeling = MorningFeeling.OK
+            )
+        )
+
+        val expectedDtoList = listOf(
+            SleepLogResponse(
+                id = 101L, userId = userId, sleepDate = mockEntityList[0].sleepDate,
+                bedtime = mockEntityList[0].bedtime, wakeTime = mockEntityList[0].wakeTime,
+                totalTimeInBedMinutes = 480, morningFeeling = MorningFeeling.GOOD
+            ),
+            SleepLogResponse(
+                id = 100L, userId = userId, sleepDate = mockEntityList[1].sleepDate,
+                bedtime = mockEntityList[1].bedtime, wakeTime = mockEntityList[1].wakeTime,
+                totalTimeInBedMinutes = 480, morningFeeling = MorningFeeling.OK
+            )
+        )
+
+        `when`(sleepLogService.getSleepLogsForUser(userId)).thenReturn(mockEntityList)
+        `when`(sleepLogMapper.toResponseDto(mockEntityList[0])).thenReturn(expectedDtoList[0])
+        `when`(sleepLogMapper.toResponseDto(mockEntityList[1])).thenReturn(expectedDtoList[1])
+
+        mockMvc.perform(
+            get("/api/v1/sleep/user/$userId/history")
+                .accept(MediaType.APPLICATION_JSON)
+        )
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.length()").value(2))
+            .andExpect(jsonPath("$[0].id").value(101))
+            .andExpect(jsonPath("$[0].morningFeeling").value("GOOD"))
+            .andExpect(jsonPath("$[1].id").value(100))
+            .andExpect(jsonPath("$[1].morningFeeling").value("OK"))
+    }
+
+    @Test
+    fun `GET user history should return 200 OK and an empty list when no history exists`() {
+        val userId = "new_user_empty"
+        `when`(sleepLogService.getSleepLogsForUser(userId)).thenReturn(emptyList())
+
+        mockMvc.perform(
+            get("/api/v1/sleep/user/$userId/history")
+                .accept(MediaType.APPLICATION_JSON)
+        )
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.length()").value(0))
+    }
+
 }
