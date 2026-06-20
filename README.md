@@ -1,3 +1,37 @@
+--
+
+## Sleep Tracker API
+
+This is a Spring Boot and Kotlin-based Restful API designed to help users log, track, and analyze their sleep patterns over time.
+
+## 🛠️ API Endpoints & Specifications
+
+The API endpoints reside in `SleepLogController`. Spring-doc is utilized to expose the API Specifications dynamically, which can be located at http://localhost:8080/swagger-ui/index.html#/ upon local runtime.
+
+The core application provides capability to:
+* Create daily sleep records.
+* Retrieve moving average trends for the past 30 days.
+* Fetch information regarding last night's specific entry.
+* Persist all telemetry data securely inside an optimized PostgreSQL table structure.
+
+### Practical Integrations & Tooling
+* **Identity Context:** In a real-world production scenario, the `userID` represents an immutable unique user identifier that would be securely provided and managed by an upstream federated cloud application or Identity Provider (IdP).
+* **Postman Integration:** The interactive Postman collection is saved directly in this project as `SleepAPI.postman_collection.json` inside the `resources` folder. In a live team framework, this collection would actively utilize decoupled variables and secure environment scopes (restricted to lower-level configurations) to facilitate cross-team collaboration.
+* Variables were used for parameters in the collection
+* **Git & Version Control Conventions:** In a standardized corporate environment, every commit and branching path would mirror a project-specific convention tied directly to a target JIRA ticket tracking identifier. As explicit tickets were omitted for this assignment context, a concise structural description of each standalone requirement was substituted to ensure clear history tracking.
+
+## Testing Suite and Code Coverage
+
+* **Service Layer Unit Tests (`SleepLogServiceTest`):** Isolates business domain logic, ensuring mock calculations handle midnight crossovers cleanly and verify fallback behavior for fresh user profiles without tracking history.
+* **Controller Layer Boundary Tests (`SleepLogControllerTest` / `GlobalExceptionHandlerTest`):** Leverages `MockMvc` to verify network serialization boundaries. Includes boundary type validation testing to guarantee malformed parameters, collections arrays, or corrupted payloads are blocked and returned early with a structured `400 Bad Request`.
+* In a CI/CD process there would be a check for code coverage and code would have been prevented from being merged in.
+
+## PR and Branching
+* There would be comments in a branch and approvals
+* A ticketing system would formalize a naming convention. Descriptions were utilized as the tickets instead
+* A project specific board was not utilized in this excercise
+* A release process will need to identify ticket numbers in a real world scenario
+
 # Backend Engineering Interview: Take-home Assignment
 
 Hello!
