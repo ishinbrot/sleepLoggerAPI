@@ -5,7 +5,7 @@ import com.noom.interview.fullstack.sleep.dto.SleepAnalyticsResponse
 import com.noom.interview.fullstack.sleep.mapper.SleepLogMapper
 import com.noom.interview.fullstack.sleep.dto.SleepLogResponse
 import com.noom.interview.fullstack.sleep.model.SleepLog
-import com.noom.interview.fullstack.sleep.service.SleepService
+import com.noom.interview.fullstack.sleep.service.SleepLogService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.Content
@@ -20,10 +20,10 @@ import org.springframework.web.bind.annotation.*
 @RestController
 @RequestMapping("/api/v1/sleep")
 @Tag(name = "Sleep Tracking", description = "Endpoints for logging and analyzing user sleep data")
-class SleepController(
-    private val sleepService: SleepService,
+class SleepLogController(
+    private val sleepLogService: SleepLogService,
     private val sleepLogMapper: SleepLogMapper)  {
-    private val log = LoggerFactory.getLogger(SleepController::class.java)
+    private val log = LoggerFactory.getLogger(SleepLogController::class.java)
     @PostMapping
     @Operation(
         summary = "Log a new sleep entry",
@@ -40,7 +40,7 @@ class SleepController(
     fun createSleepLog(
         @RequestBody request: CreateSleepLogRequest
     ): ResponseEntity<SleepLogResponse> {
-            val savedLog = sleepService.createLog(request)
+            val savedLog = sleepLogService.createLog(request)
 
             return ResponseEntity.status(HttpStatus.CREATED).body(sleepLogMapper.toResponseDto(savedLog))
     }
@@ -60,7 +60,7 @@ class SleepController(
         @PathVariable userId: String
     ): ResponseEntity<SleepAnalyticsResponse> {
         log.debug("Received analytics request endpoint for userId: {}", userId)
-        val analytics = sleepService.getThirtyDayAnalytics(userId)
+        val analytics = sleepLogService.getThirtyDayAnalytics(userId)
         return ResponseEntity.ok(analytics)
     }
 
@@ -83,7 +83,7 @@ class SleepController(
         @PathVariable id: Long
     ): ResponseEntity<SleepLogResponse> {
         log.info("Received request for single sleep log view, ID: {}", id)
-        val sleepLog = sleepService.getLogById(id)
+        val sleepLog = sleepLogService.getLogById(id)
         return ResponseEntity.ok(sleepLogMapper.toResponseDto(sleepLog))
     }
     @GetMapping("/user/{userId}/last-night")
@@ -102,7 +102,7 @@ class SleepController(
         @PathVariable userId: String
     ): ResponseEntity<SleepLogResponse> {
         log.debug("Fetching last night's profile for userId: {}", userId)
-        val savedLog = sleepService.getLastNightsSleep(userId)
+        val savedLog = sleepLogService.getLastNightsSleep(userId)
         return ResponseEntity.ok(sleepLogMapper.toResponseDto(savedLog))
     }
 }

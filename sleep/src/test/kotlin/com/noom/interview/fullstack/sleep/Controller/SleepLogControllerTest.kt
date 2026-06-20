@@ -1,14 +1,14 @@
 package com.noom.interview.fullstack.sleep.Controller
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.noom.interview.fullstack.sleep.SleepController
+import com.noom.interview.fullstack.sleep.SleepLogController
 import com.noom.interview.fullstack.sleep.dto.CreateSleepLogRequest
 import com.noom.interview.fullstack.sleep.dto.SleepAnalyticsResponse
 import com.noom.interview.fullstack.sleep.mapper.SleepLogMapper
 import com.noom.interview.fullstack.sleep.dto.SleepLogResponse
 import com.noom.interview.fullstack.sleep.model.MorningFeeling
 import com.noom.interview.fullstack.sleep.model.SleepLog
-import com.noom.interview.fullstack.sleep.service.SleepService
+import com.noom.interview.fullstack.sleep.service.SleepLogService
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito.`when`
 import org.springframework.beans.factory.annotation.Autowired
@@ -23,20 +23,19 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import java.time.LocalDate
 import java.time.LocalTime
 
-@WebMvcTest(SleepController::class)
-class SleepControllerTest @Autowired constructor(
+@WebMvcTest(SleepLogController::class)
+class SleepLogControllerTest @Autowired constructor(
     val mockMvc: MockMvc,
     val objectMapper: ObjectMapper
 ) {
 
     @MockBean
-    lateinit var sleepService: SleepService
+    lateinit var sleepLogService: SleepLogService
     @MockBean
     lateinit var sleepLogMapper: SleepLogMapper
 
     @Test
     fun `POST sleep entry should return 201 Created and map properties correctly`() {
-        // Arrange
         val request = CreateSleepLogRequest(
             userId = "user_456",
             sleepDate = LocalDate.of(2026, 6, 19),
@@ -64,7 +63,7 @@ class SleepControllerTest @Autowired constructor(
             morningFeeling = request.morningFeeling
         )
 
-        `when`(sleepService.createLog(request)).thenReturn(mockSavedEntity)
+        `when`(sleepLogService.createLog(request)).thenReturn(mockSavedEntity)
         `when`(sleepLogMapper.toResponseDto(mockSavedEntity)).thenReturn(expectedResponseDto)
         mockMvc.perform(
             post("/api/v1/sleep")
@@ -89,7 +88,7 @@ class SleepControllerTest @Autowired constructor(
         )
 
         val exceptionMessage = "A sleep log entry already exists for user user_duplicate"
-        `when`(sleepService.createLog(request)).thenThrow(IllegalArgumentException(exceptionMessage))
+        `when`(sleepLogService.createLog(request)).thenThrow(IllegalArgumentException(exceptionMessage))
 
         mockMvc.perform(
             post("/api/v1/sleep")
@@ -111,9 +110,8 @@ class SleepControllerTest @Autowired constructor(
             latestSleepLogId = 99L
         )
 
-        `when`(sleepService.getThirtyDayAnalytics(userId)).thenReturn(mockAnalytics)
+        `when`(sleepLogService.getThirtyDayAnalytics(userId)).thenReturn(mockAnalytics)
 
-        // Act & Assert
         mockMvc.perform(
             get("/api/v1/sleep/user/$userId/analytics")
                 .accept(MediaType.APPLICATION_JSON)
@@ -155,7 +153,7 @@ class SleepControllerTest @Autowired constructor(
             morningFeeling = request.morningFeeling
         )
 
-        `when`(sleepService.getLogById(targetId)).thenReturn(mockSavedEntity)
+        `when`(sleepLogService.getLogById(targetId)).thenReturn(mockSavedEntity)
         `when`(sleepLogMapper.toResponseDto(mockSavedEntity)).thenReturn(expectedResponseDto)
         mockMvc.perform(
             get("/api/v1/sleep/$targetId")
@@ -172,7 +170,7 @@ class SleepControllerTest @Autowired constructor(
         val nonExistentId = 999L
         val errorMessage = "Sleep log entry not found with ID: $nonExistentId"
 
-        `when`(sleepService.getLogById(nonExistentId))
+        `when`(sleepLogService.getLogById(nonExistentId))
             .thenThrow(NoSuchElementException(errorMessage))
 
         mockMvc.perform(
@@ -183,7 +181,6 @@ class SleepControllerTest @Autowired constructor(
     }
     @Test
     fun `GET last night sleep profile should return 200 OK and match raw data payload`() {
-        // Arrange
         val userId = "user_456"
         val mockEntity = SleepLog(
             id = 99L,
@@ -205,10 +202,9 @@ class SleepControllerTest @Autowired constructor(
             morningFeeling = mockEntity.morningFeeling
         )
 
-        `when`(sleepService.getLastNightsSleep(userId)).thenReturn(mockEntity)
+        `when`(sleepLogService.getLastNightsSleep(userId)).thenReturn(mockEntity)
         `when`(sleepLogMapper.toResponseDto(mockEntity)).thenReturn(expectedResponseDto)
 
-        // Act & Assert
         mockMvc.perform(
             get("/api/v1/sleep/user/$userId/last-night")
                 .accept(MediaType.APPLICATION_JSON)

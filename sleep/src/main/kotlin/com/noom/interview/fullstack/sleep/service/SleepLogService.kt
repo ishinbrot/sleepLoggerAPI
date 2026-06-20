@@ -1,6 +1,5 @@
 package com.noom.interview.fullstack.sleep.service
 
-import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import com.noom.interview.fullstack.sleep.dto.CreateSleepLogRequest
 import com.noom.interview.fullstack.sleep.dto.SleepAnalyticsResponse
@@ -13,8 +12,8 @@ import java.time.LocalDate
 import java.time.LocalTime
 
 @Service
-class SleepService(private val sleepLogRepository: SleepLogRepository) {
-    private val log = LoggerFactory.getLogger(SleepService::class.java)
+class SleepLogService(private val sleepLogRepository: SleepLogRepository) {
+    private val log = LoggerFactory.getLogger(SleepLogService::class.java)
 
     @Transactional(readOnly = true)
     fun getLogsForUser(userId: String): List<SleepLog> {
@@ -29,10 +28,8 @@ class SleepService(private val sleepLogRepository: SleepLogRepository) {
             throw IllegalArgumentException("A sleep log entry already exists for user ${request.userId} on date ${request.sleepDate}")
         }
 
-        // 2. Automatically calculate total time spent in bed
         val totalMinutes = calculateMinutesInBed(request.bedtime, request.wakeTime)
 
-        // 3. Map DTO to Entity structure
         val sleepLog = SleepLog(
             userId = request.userId,
             sleepDate = request.sleepDate,
@@ -52,7 +49,6 @@ class SleepService(private val sleepLogRepository: SleepLogRepository) {
         val duration = Duration.between(bedtime, wakeTime)
         val minutes = duration.toMinutes()
 
-        // Handle overnight sleep spanning past midnight (e.g., bedtime 10 PM, wake time 6 AM)
         return if (minutes < 0) {
             (minutes + Duration.ofDays(1).toMinutes()).toInt()
         } else {

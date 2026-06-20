@@ -1,7 +1,6 @@
 package com.noom.interview.fullstack.sleep.exception
 
 import com.fasterxml.jackson.databind.exc.MismatchedInputException
-import com.noom.interview.fullstack.sleep.service.SleepService
 import net.bytebuddy.agent.builder.AgentBuilder
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus

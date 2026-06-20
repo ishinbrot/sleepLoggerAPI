@@ -10,8 +10,6 @@ import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.ArgumentMatchers.any
-import org.mockito.ArgumentMatchers.eq
 import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.assertj.core.api.Assertions.assertThat
@@ -22,13 +20,13 @@ import java.time.LocalTime
 import java.util.Optional
 
 @ExtendWith(MockitoExtension::class)
-class SleepServiceTest {
+class SleepLogServiceTest {
 
     @Mock
     lateinit var sleepLogRepository: SleepLogRepository
 
     @InjectMocks
-    lateinit var sleepService: SleepService
+    lateinit var sleepLogService: SleepLogService
 
     @Test
     fun `createLog should calculate correct minutes when sleep crosses midnight`() {
@@ -61,7 +59,7 @@ class SleepServiceTest {
         `when`(sleepLogRepository.save(org.mockito.ArgumentMatchers.any(SleepLog::class.java))).thenReturn(mockSavedLog)
 
         // Act
-        val result = sleepService.createLog(request)
+        val result = sleepLogService.createLog(request)
 
         // Assert
         assertNotNull(result.id)
@@ -95,7 +93,7 @@ class SleepServiceTest {
         `when`(sleepLogRepository.save(org.mockito.ArgumentMatchers.any(SleepLog::class.java))).thenReturn(mockSavedLog)
 
         // Act
-        val result = sleepService.createLog(request)
+        val result = sleepLogService.createLog(request)
 
         // Assert
         assertEquals(90, result.totalTimeInBedMinutes)
@@ -117,7 +115,7 @@ class SleepServiceTest {
 
         // Act & Assert
         val exception = assertThrows<IllegalArgumentException> {
-            sleepService.createLog(request)
+            sleepLogService.createLog(request)
         }
 
         assertEquals("A sleep log entry already exists for user user_123abc on date 2026-06-19", exception.message)
@@ -145,7 +143,7 @@ class SleepServiceTest {
         `when`(sleepLogRepository.findByUserIdAndSleepDateGreaterThanEqual(userId, targetStartDate))
             .thenReturn(mockLogs)
 
-        val result: SleepAnalyticsResponse = sleepService.getThirtyDayAnalytics(userId)
+        val result: SleepAnalyticsResponse = sleepLogService.getThirtyDayAnalytics(userId)
 
         assertThat(result.averageTotalTimeInBedMinutes).isEqualTo(510.0)
 
@@ -168,7 +166,7 @@ class SleepServiceTest {
         `when`(sleepLogRepository.findByUserIdAndSleepDateGreaterThanEqual(userId, targetStartDate))
             .thenReturn(emptyList())
 
-        val result = sleepService.getThirtyDayAnalytics(userId)
+        val result = sleepLogService.getThirtyDayAnalytics(userId)
 
         assertThat(result.averageTotalTimeInBedMinutes).isEqualTo(0.0)
         assertThat(result.averageBedtime).isNull()
@@ -191,7 +189,7 @@ class SleepServiceTest {
 
         `when`(sleepLogRepository.findById(targetId)).thenReturn(java.util.Optional.of(mockLog))
 
-        val result = sleepService.getLogById(targetId)
+        val result = sleepLogService.getLogById(targetId)
 
         assertEquals(targetId, result.id)
         assertEquals("user_abc", result.userId)
@@ -204,7 +202,7 @@ class SleepServiceTest {
         `when`(sleepLogRepository.findById(nonExistentId)).thenReturn(java.util.Optional.empty())
 
         val exception = org.junit.jupiter.api.assertThrows<NoSuchElementException> {
-            sleepService.getLogById(nonExistentId)
+            sleepLogService.getLogById(nonExistentId)
         }
 
         assertEquals("Sleep log entry not found with ID: $nonExistentId", exception.message)
@@ -225,7 +223,7 @@ class SleepServiceTest {
 
         `when`(sleepLogRepository.findFirstByUserIdOrderBySleepDateDesc(userId)).thenReturn(Optional.of(expectedLog))
 
-        val result = sleepService.getLastNightsSleep(userId)
+        val result = sleepLogService.getLastNightsSleep(userId)
 
          assertEquals(99L, result.id)
         assertEquals(LocalDate.now(), result.sleepDate)
