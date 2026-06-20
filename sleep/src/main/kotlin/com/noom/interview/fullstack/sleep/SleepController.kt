@@ -2,6 +2,7 @@ package com.noom.interview.fullstack.sleep
 
 import com.noom.interview.fullstack.sleep.dto.CreateSleepLogRequest
 import com.noom.interview.fullstack.sleep.dto.SleepAnalyticsResponse
+import com.noom.interview.fullstack.sleep.mapper.SleepLogMapper
 import com.noom.interview.fullstack.sleep.dto.SleepLogResponse
 import com.noom.interview.fullstack.sleep.model.SleepLog
 import com.noom.interview.fullstack.sleep.service.SleepService
@@ -19,9 +20,10 @@ import org.springframework.web.bind.annotation.*
 @RestController
 @RequestMapping("/api/v1/sleep")
 @Tag(name = "Sleep Tracking", description = "Endpoints for logging and analyzing user sleep data")
-class SleepController(private val sleepService: SleepService) {
+class SleepController(
+    private val sleepService: SleepService,
+    private val sleepLogMapper: SleepLogMapper)  {
     private val log = LoggerFactory.getLogger(SleepController::class.java)
-
     @PostMapping
     @Operation(
         summary = "Log a new sleep entry",
@@ -40,18 +42,7 @@ class SleepController(private val sleepService: SleepService) {
     ): ResponseEntity<SleepLogResponse> {
             val savedLog = sleepService.createLog(request)
 
-            // Map the saved database entity back to your clean response DTO
-            val responseBody = SleepLogResponse(
-                id = savedLog.id ?: throw IllegalStateException("Entity ID was not generated"),
-                userId = savedLog.userId,
-                sleepDate = savedLog.sleepDate,
-                bedtime = savedLog.bedtime,
-                wakeTime = savedLog.wakeTime,
-                totalTimeInBedMinutes = savedLog.totalTimeInBedMinutes,
-                morningFeeling = savedLog.morningFeeling
-            )
-
-            return ResponseEntity.status(HttpStatus.CREATED).body(responseBody)
+            return ResponseEntity.status(HttpStatus.CREATED).body(sleepLogMapper.toResponseDto(savedLog))
     }
     @GetMapping("/user/{userId}/analytics")
     @Operation(
@@ -90,9 +81,8 @@ class SleepController(private val sleepService: SleepService) {
     fun getSleepLogById(
         @Parameter(description = "The target log identifier (e.g., extracted from latestSleepLogId)", example = "42")
         @PathVariable id: Long
-    ): ResponseEntity<SleepLog> {
+    ): ResponseEntity<SleepLogResponse> {
         log.info("Received request for single sleep log view, ID: {}", id)
         val sleepLog = sleepService.getLogById(id)
-        return ResponseEntity.ok(sleepLog)
-    }
+        return ResponseEntity.ok(sleepLogMapper.toResponseDto(sleepLog))    }
 }
