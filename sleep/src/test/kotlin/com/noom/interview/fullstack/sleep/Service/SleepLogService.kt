@@ -144,7 +144,6 @@ class SleepServiceTest {
         `when`(sleepLogRepository.findByUserIdAndSleepDateGreaterThanEqual(userId, targetStartDate))
             .thenReturn(mockLogs)
 
-        // Act
         val result: SleepAnalyticsResponse = sleepService.getThirtyDayAnalytics(userId)
 
         assertThat(result.averageTotalTimeInBedMinutes).isEqualTo(510.0)
@@ -156,6 +155,8 @@ class SleepServiceTest {
         assertThat(result.feelingFrequencies["GOOD"]).isEqualTo(1)
         assertThat(result.feelingFrequencies["OK"]).isEqualTo(1)
         assertThat(result.feelingFrequencies["BAD"]).isEqualTo(0)
+        assertEquals(1L, result.latestSleepLogId)
+
     }
 
     @Test
