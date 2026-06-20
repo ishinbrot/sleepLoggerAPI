@@ -12,10 +12,11 @@ The core application provides capability to:
 * Create daily sleep records.
 * Retrieve moving average trends for the past 30 days.
 * Fetch information regarding last night's specific entry.
-* Persist all telemetry data securely inside an optimized PostgreSQL table structure.
+* Toggle between 1 and 30 day average. This is available via a separate API call, and a specific ID being returned for the 30 day average
+* Persist all data securely inside an optimized PostgreSQL table structure.
 
 ### Practical Integrations & Tooling
-* **Identity Context:** In a real-world production scenario, the `userID` represents an immutable unique user identifier that would be securely provided and managed by an upstream federated cloud application or Identity Provider (IdP).
+* **Identity Context:** In a real-world production scenario, the `userID` represents an immutable unique user identifier.
 * **Postman Integration:** The interactive Postman collection is saved directly in this project as `SleepAPI.postman_collection.json` inside the `resources` folder. In a live team framework, this collection would actively utilize decoupled variables and secure environment scopes (restricted to lower-level configurations) to facilitate cross-team collaboration.
 * **Script:** Running `test-api.sh` in the top level directory will test the API ./resources/test-api.sh (The API is required to be running prior to the script)
 * Variables were used for parameters in the collection
@@ -28,7 +29,7 @@ The core application provides capability to:
 * In a CI/CD process there would be a check for code coverage and code would have been prevented from being merged in.
 
 ## PR and Branching
-* There would be comments in a branch and approvals
+* There would be comments from other reviewersin a branch and approvals in a real-world scenario.
 * A ticketing system would formalize a naming convention. Descriptions were utilized as the tickets instead
 * A project specific board was not utilized in this excercise
 * A release process will need to identify ticket numbers in a real world scenario
