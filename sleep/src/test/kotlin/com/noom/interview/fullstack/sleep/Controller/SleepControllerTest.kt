@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.noom.interview.fullstack.sleep.SleepController
 import com.noom.interview.fullstack.sleep.dto.CreateSleepLogRequest
 import com.noom.interview.fullstack.sleep.dto.SleepAnalyticsResponse
+import com.noom.interview.fullstack.sleep.mapper.SleepLogMapper
+import com.noom.interview.fullstack.sleep.dto.SleepLogResponse
 import com.noom.interview.fullstack.sleep.model.MorningFeeling
 import com.noom.interview.fullstack.sleep.model.SleepLog
 import com.noom.interview.fullstack.sleep.service.SleepService
@@ -29,6 +31,8 @@ class SleepControllerTest @Autowired constructor(
 
     @MockBean
     lateinit var sleepService: SleepService
+    @MockBean
+    lateinit var sleepLogMapper: SleepLogMapper
 
     @Test
     fun `POST sleep entry should return 201 Created and map properties correctly`() {
@@ -50,10 +54,18 @@ class SleepControllerTest @Autowired constructor(
             totalTimeInBedMinutes = 495, // 8h 15m
             morningFeeling = request.morningFeeling
         )
+        val expectedResponseDto = SleepLogResponse(
+            id = 99L,
+            userId = "user_456",
+            sleepDate = request.sleepDate,
+            bedtime = request.bedtime,
+            wakeTime = request.wakeTime,
+            totalTimeInBedMinutes = 495,
+            morningFeeling = request.morningFeeling
+        )
 
         `when`(sleepService.createLog(request)).thenReturn(mockSavedEntity)
-
-        // Act & Assert
+        `when`(sleepLogMapper.toResponseDto(mockSavedEntity)).thenReturn(expectedResponseDto)
         mockMvc.perform(
             post("/api/v1/sleep")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -116,19 +128,35 @@ class SleepControllerTest @Autowired constructor(
 
     @Test
     fun `GET single log by ID should return 200 OK and match individual parameters`() {
-        val targetId = 99L
-        val mockEntity = SleepLog(
-            id = targetId,
+        val request = CreateSleepLogRequest(
             userId = "user_456",
             sleepDate = LocalDate.of(2026, 6, 19),
             bedtime = LocalTime.of(22, 30, 0),
             wakeTime = LocalTime.of(6, 45, 0),
-            totalTimeInBedMinutes = 495,
             morningFeeling = MorningFeeling.GOOD
         )
+        val targetId = 99L
+        val mockSavedEntity = SleepLog(
+            id = 99L,
+            userId = request.userId,
+            sleepDate = request.sleepDate,
+            bedtime = request.bedtime,
+            wakeTime = request.wakeTime,
+            totalTimeInBedMinutes = 495,
+            morningFeeling = request.morningFeeling
+        )
+        val expectedResponseDto = SleepLogResponse(
+            id = 99L,
+            userId = "user_456",
+            sleepDate = request.sleepDate,
+            bedtime = request.bedtime,
+            wakeTime = request.wakeTime,
+            totalTimeInBedMinutes = 495,
+            morningFeeling = request.morningFeeling
+        )
 
-        `when`(sleepService.getLogById(targetId)).thenReturn(mockEntity)
-
+        `when`(sleepService.getLogById(targetId)).thenReturn(mockSavedEntity)
+        `when`(sleepLogMapper.toResponseDto(mockSavedEntity)).thenReturn(expectedResponseDto)
         mockMvc.perform(
             get("/api/v1/sleep/$targetId")
                 .accept(MediaType.APPLICATION_JSON)
