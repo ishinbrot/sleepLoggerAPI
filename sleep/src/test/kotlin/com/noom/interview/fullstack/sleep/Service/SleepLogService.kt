@@ -166,13 +166,45 @@ class SleepServiceTest {
         `when`(sleepLogRepository.findByUserIdAndSleepDateGreaterThanEqual(userId, targetStartDate))
             .thenReturn(emptyList())
 
-        // Act
         val result = sleepService.getThirtyDayAnalytics(userId)
 
-        // Assert
         assertThat(result.averageTotalTimeInBedMinutes).isEqualTo(0.0)
         assertThat(result.averageBedtime).isNull()
         assertThat(result.averageWakeTime).isNull()
         assertThat(result.feelingFrequencies["GOOD"]).isEqualTo(0)
+    }
+
+    @Test
+    fun `getLogById should return the sleep log when a valid ID is provided`() {
+        val targetId = 42L
+        val mockLog = SleepLog(
+            id = targetId,
+            userId = "user_abc",
+            sleepDate = LocalDate.now(),
+            bedtime = LocalTime.of(22, 0),
+            wakeTime = LocalTime.of(6, 0),
+            totalTimeInBedMinutes = 480,
+            morningFeeling = MorningFeeling.GOOD
+        )
+
+        `when`(sleepLogRepository.findById(targetId)).thenReturn(java.util.Optional.of(mockLog))
+
+        val result = sleepService.getLogById(targetId)
+
+        assertEquals(targetId, result.id)
+        assertEquals("user_abc", result.userId)
+        assertEquals(MorningFeeling.GOOD, result.morningFeeling)
+    }
+
+    @Test
+    fun `getLogById should throw NoSuchElementException when the ID does not exist`() {
+        val nonExistentId = 999L
+        `when`(sleepLogRepository.findById(nonExistentId)).thenReturn(java.util.Optional.empty())
+
+        val exception = org.junit.jupiter.api.assertThrows<NoSuchElementException> {
+            sleepService.getLogById(nonExistentId)
+        }
+
+        assertEquals("Sleep log entry not found with ID: $nonExistentId", exception.message)
     }
 }

@@ -74,9 +74,11 @@ class SleepService(private val sleepLogRepository: SleepLogRepository) {
                 averageTotalTimeInBedMinutes = 0.0,
                 averageBedtime = null,
                 averageWakeTime = null,
-                feelingFrequencies = mapOf("BAD" to 0, "OK" to 0, "GOOD" to 0)
+                feelingFrequencies = mapOf("BAD" to 0, "OK" to 0, "GOOD" to 0),
+                null
             )
         }
+        val latestLogId = logs.maxByOrNull { it.sleepDate }?.id
         log.debug("Successfully retrieved {} sleep log records for processing for userId: {}", logs.size, userId)
         val avgTimeInBed = logs.map { it.totalTimeInBedMinutes }.average()
 
@@ -95,7 +97,13 @@ class SleepService(private val sleepLogRepository: SleepLogRepository) {
             averageTotalTimeInBedMinutes = avgTimeInBed,
             averageBedtime = LocalTime.ofSecondOfDay(avgBedtimeSeconds),
             averageWakeTime = LocalTime.ofSecondOfDay(avgWakeTimeSeconds),
-            feelingFrequencies = initialFrequencies
+            feelingFrequencies = initialFrequencies,
+            latestSleepLogId = latestLogId
         )
+    }
+    fun getLogById(id: Long): SleepLog {
+        log.info("Fetching single sleep log record for id: {}", id)
+        return sleepLogRepository.findById(id)
+            .orElseThrow { NoSuchElementException("Sleep log entry not found with ID: $id") }
     }
 }

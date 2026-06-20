@@ -3,6 +3,7 @@ package com.noom.interview.fullstack.sleep
 import com.noom.interview.fullstack.sleep.dto.CreateSleepLogRequest
 import com.noom.interview.fullstack.sleep.dto.SleepAnalyticsResponse
 import com.noom.interview.fullstack.sleep.dto.SleepLogResponse
+import com.noom.interview.fullstack.sleep.model.SleepLog
 import com.noom.interview.fullstack.sleep.service.SleepService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
@@ -70,5 +71,28 @@ class SleepController(private val sleepService: SleepService) {
         log.debug("Received analytics request endpoint for userId: {}", userId)
         val analytics = sleepService.getThirtyDayAnalytics(userId)
         return ResponseEntity.ok(analytics)
+    }
+
+    @GetMapping("/{id}")
+    @Operation(
+        summary = "Switch back to single sleep log view",
+        description = "Retrieves granular historical data for an individual night using the navigation hook ID returned by the analytics payload.",
+        responses = [
+            ApiResponse(
+                responseCode = "200",
+                description = "Single sleep log instance located successfully",
+                content = [Content(schema = Schema(implementation = SleepLog::class))]
+            ),
+            ApiResponse(responseCode = "404", description = "Target sleep log reference not found"),
+            ApiResponse(responseCode = "500", description = "Internal server error state")
+        ]
+    )
+    fun getSleepLogById(
+        @Parameter(description = "The target log identifier (e.g., extracted from latestSleepLogId)", example = "42")
+        @PathVariable id: Long
+    ): ResponseEntity<SleepLog> {
+        log.info("Received request for single sleep log view, ID: {}", id)
+        val sleepLog = sleepService.getLogById(id)
+        return ResponseEntity.ok(sleepLog)
     }
 }

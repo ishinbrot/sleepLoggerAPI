@@ -16,7 +16,6 @@ class GlobalExceptionHandler {
 
     private val log = LoggerFactory.getLogger(AgentBuilder.CircularityLock.Global::class.java)
 
-    // 1. Handles Business Rules Violations (e.g., throwing IllegalArgumentException in SleepService)
     @ExceptionHandler(IllegalArgumentException::class)
     fun handleIllegalArgumentException(
         ex: IllegalArgumentException,
@@ -31,7 +30,11 @@ class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse)
     }
 
-    // 2. Handles Bad JSON Formatting gracefully (Fixes the LocalTime parsing crash from earlier!)
+    @ExceptionHandler(NoSuchElementException::class)
+    fun handleNotFound(ex: NoSuchElementException): ResponseEntity<String> {
+        return ResponseEntity.status(404).body(ex.message)
+    }
+
     @ExceptionHandler(HttpMessageNotReadableException::class)
     fun handleHttpMessageNotReadable(
         ex: HttpMessageNotReadableException,
