@@ -14,10 +14,8 @@ class SleepLogMapper {
      * It also isolates the core mathematical formula for calculating total duration.
      */
     fun toEntity(request: CreateSleepLogRequest): SleepLog {
-        // Calculate the total duration in minutes between bedtime and wake time
         val rawMinutes = Duration.between(request.bedtime, request.wakeTime).toMinutes().toInt()
 
-        // Handle roll-over if the user slept past midnight
         val adjustedMinutes = if (rawMinutes < 0) rawMinutes + 1440 else rawMinutes
 
         return SleepLog(

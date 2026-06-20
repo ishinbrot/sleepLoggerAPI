@@ -2,30 +2,28 @@ package com.noom.interview.fullstack.sleep.exception
 
 import com.fasterxml.jackson.databind.JsonMappingException
 import com.fasterxml.jackson.databind.exc.MismatchedInputException
-import com.noom.interview.fullstack.sleep.SleepController
+import com.noom.interview.fullstack.sleep.SleepLogController
 import com.noom.interview.fullstack.sleep.mapper.SleepLogMapper
-import com.noom.interview.fullstack.sleep.service.SleepService
+import com.noom.interview.fullstack.sleep.service.SleepLogService
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito.`when`
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.boot.test.mock.mockito.MockBean
-import org.springframework.http.MediaType
 import org.springframework.http.converter.HttpMessageNotReadableException
 import org.springframework.mock.http.MockHttpInputMessage
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
-@WebMvcTest(SleepController::class)
+@WebMvcTest(SleepLogController::class)
 class GlobalExceptionHandlerTest @Autowired constructor(
     val mockMvc: MockMvc
 ) {
 
     @MockBean
-    lateinit var sleepService: SleepService
+    lateinit var sleepLogService: SleepLogService
     @MockBean
     lateinit var sleepLogMapper: SleepLogMapper
     @Test
@@ -33,7 +31,7 @@ class GlobalExceptionHandlerTest @Autowired constructor(
         val userId = "user_123"
         val exceptionMessage = "Duplicate entry for this date"
 
-        `when`(sleepService.getThirtyDayAnalytics(userId))
+        `when`(sleepLogService.getThirtyDayAnalytics(userId))
             .thenThrow(IllegalArgumentException(exceptionMessage))
 
         mockMvc.perform(get("/api/v1/sleep/user/$userId/analytics"))
@@ -61,7 +59,7 @@ class GlobalExceptionHandlerTest @Autowired constructor(
         )
 
         // Force controller entry point to throw this framework level exception
-        `when`(sleepService.getThirtyDayAnalytics("user_123")).thenThrow(targetException)
+        `when`(sleepLogService.getThirtyDayAnalytics("user_123")).thenThrow(targetException)
 
         mockMvc.perform(get("/api/v1/sleep/user/user_123/analytics"))
             .andExpect(status().isBadRequest)
@@ -77,7 +75,7 @@ class GlobalExceptionHandlerTest @Autowired constructor(
             MockHttpInputMessage(ByteArray(0))
         )
 
-        `when`(sleepService.getThirtyDayAnalytics("user_123")).thenThrow(targetException)
+        `when`(sleepLogService.getThirtyDayAnalytics("user_123")).thenThrow(targetException)
 
         mockMvc.perform(get("/api/v1/sleep/user/user_123/analytics"))
             .andExpect(status().isBadRequest)
@@ -87,7 +85,7 @@ class GlobalExceptionHandlerTest @Autowired constructor(
     fun `should handle unexpected Exception and return 500 Internal Server Error`() {
         val userId = "user_123"
 
-        `when`(sleepService.getThirtyDayAnalytics(userId))
+        `when`(sleepLogService.getThirtyDayAnalytics(userId))
             .thenThrow(RuntimeException("Database connection dropped down unexpectedly!"))
 
         mockMvc.perform(get("/api/v1/sleep/user/$userId/analytics"))
